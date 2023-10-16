@@ -1,0 +1,25 @@
+{
+  "name": "mdu-ds",
+  "description": "A data-structure dependency",
+  "private": false,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "dist/mdu-ds.umd.js",
+  "module": "dist/mdu-ds.es.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "dataStructor",
+    "JavaScript"
+  ],
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.6.0"
+  }
+}
