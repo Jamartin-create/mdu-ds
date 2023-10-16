@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [dts()],
   build: {
     lib: {
-      entry: "tools/index.ts",
+      entry: "structure/index.ts",
       name: "mdu-ds",
       fileName: (format) => `mdu-ds.${format}.js`,
     },
