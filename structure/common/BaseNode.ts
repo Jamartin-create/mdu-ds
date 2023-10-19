@@ -1,8 +1,8 @@
 export class LinkNode<T> {
   value: T;
-  next: T | null | undefined;
-  constructor(val: T, next?: T) {
+  next: LinkNode<T> | null | undefined;
+  constructor(val: T) {
     this.value = val;
-    this.next = next;
+    this.next = null;
   }
 }
