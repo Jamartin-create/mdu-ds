@@ -11,3 +11,7 @@ export function defaultCompare<T>(a: T, b: T) {
   if (a < b) return -1;
   return 1;
 }
+
+export function defaultIsEqual<T>(a: T, b: T) {
+  return a === b;
+}
