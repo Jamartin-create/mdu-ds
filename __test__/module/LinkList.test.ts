@@ -51,7 +51,7 @@ describe("DoubleLinkList basic func test", () => {
     doubleLinkList.insert(7, 4);
     expect(doubleLinkList.toString()).toBe("3,6,2,4,7");
     doubleLinkList.remove(3);
-    // expect(doubleLinkList.toString()).toBe("3,6,2");
+    expect(doubleLinkList.toString()).toBe("3,6,2,7");
   });
   it("Test remove", () => {});
 });
