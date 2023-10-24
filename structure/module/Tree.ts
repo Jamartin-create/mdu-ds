@@ -26,7 +26,7 @@ export class BinarySearchTree<T> extends BaseClass {
   }
 
   search(value: T) {
-    return this.searchNode(this.root, value);
+    return this.searchNode(this.root, value) ? true : false;
   }
 
   inOrderTraverse() {
@@ -58,12 +58,7 @@ export class BinarySearchTree<T> extends BaseClass {
   }
 
   remove(value: T) {
-    const target = this.search(value);
-    if (!target) return false;
-    // 没有子节点，直接删
-    // 有左节点，左节点替换自己
-    // 有左右节点，移除右侧节点里最小的数
-    return true;
+    return this.removeNode(this.root, value) ? true : false;
   }
 
   private removeNode(node: Nullable<TreeNode<T>>, value: T) {
@@ -107,7 +102,7 @@ export class BinarySearchTree<T> extends BaseClass {
       return this.searchNode(node.left, value);
     } else if (this.compareFn(value, node.value) === COMPARE.BIGR_THAN) {
       // 大，右
-      return this.searchNode(node.right, node.value);
+      return this.searchNode(node.right, value);
     } else {
       return node;
     }
