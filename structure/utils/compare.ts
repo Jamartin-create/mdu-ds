@@ -6,6 +6,8 @@ export const COMPARE = {
 
 export const NOT_EXIT = -1;
 
+export type CompareFn<T> = (a: T, b: T) => number;
+
 export function defaultCompare<T>(a: T, b: T) {
   if (a === b) return 0;
   if (a < b) return -1;
