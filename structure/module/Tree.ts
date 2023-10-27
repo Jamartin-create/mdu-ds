@@ -154,3 +154,110 @@ export class BinarySearchTree<T> extends BaseClass {
     }
   }
 }
+
+const BalanceType = {
+  UNBALANCE_RIGHT: 1,
+  SLIGHT_UNBALANCE_RIGHT: 2,
+  BALANCE: 3,
+  SLIGHT_UNBALANCE_LEFT: 4,
+  UNBALANCE_LEFT: 5,
+};
+
+// 平衡二叉树
+export class AVLTree<T> extends BinarySearchTree<T> {
+  constructor(compareFn: CompareFn<T> = defaultCompare<T>) {
+    super(compareFn);
+  }
+
+  // 复写二叉树的 insert 方法
+  insert(value: T): void {
+    this.root = this.insertAVLNode(this.root, value);
+  }
+
+  // 新实现“插入”核心算法
+  private insertAVLNode(node: Nullable<TreeNode<T>>, value: T): TreeNode<T> {
+    if (!node) {
+      return new TreeNode<T>(value);
+    } else if (this.compareFn(value, node.value) === COMPARE.LESS_THAN) {
+      node.left = this.insertAVLNode(node.left, value);
+    } else if (this.compareFn(value, node.value) === COMPARE.BIGR_THAN) {
+      node.right = this.insertAVLNode(node.right, value);
+    } else {
+      return node;
+    }
+
+    const balance = this.checkBalanced(node);
+    if (balance === BalanceType.UNBALANCE_LEFT) {
+      if (this.compareFn(value, node.left!.value) === COMPARE.LESS_THAN) {
+        node = this.rotationLL(node);
+      } else {
+        return this.rotationLR(node);
+      }
+    }
+
+    if (balance === BalanceType.UNBALANCE_RIGHT) {
+      if (this.compareFn(value, node.right!.value) === COMPARE.BIGR_THAN) {
+        node = this.rotationRR(node);
+      } else {
+        return this.rotationRL(node);
+      }
+    }
+    return node;
+  }
+
+  // RL
+  private rotationRL(node: TreeNode<T>) {
+    node.right = this.rotationLL(node.right!);
+    return this.rotationRR(node);
+  }
+
+  // LR
+  private rotationLR(node: TreeNode<T>) {
+    node.left = this.rotationRR(node.left!);
+    return this.rotationLL(node);
+  }
+
+  // 节点右旋转（针对 LL 情况）
+  private rotationLL(node: TreeNode<T>) {
+    const temp = node.right!;
+    node.right = temp.left;
+    temp.left = node;
+    return node;
+  }
+
+  // 节点左旋转（针对 RR 情况）
+  private rotationRR(node: TreeNode<T>) {
+    const temp = node.left!; // 这个方法只有在负方法验证了 left 存在后才会调用
+    node.left = temp.right;
+    temp.right = node;
+    return node;
+  }
+
+  // 检查树是否平衡
+  private checkBalanced(node: TreeNode<T>): number {
+    const balanceType =
+      this.getNodeHeight(node.left) - this.getNodeHeight(node.right);
+    switch (balanceType) {
+      case -2:
+        return BalanceType.UNBALANCE_RIGHT;
+      case -1:
+        return BalanceType.SLIGHT_UNBALANCE_RIGHT;
+      case 1:
+        return BalanceType.SLIGHT_UNBALANCE_LEFT;
+      case 2:
+        return BalanceType.UNBALANCE_LEFT;
+      default:
+        return BalanceType.BALANCE;
+    }
+  }
+
+  // 获取节点高度
+  private getNodeHeight(node: Nullable<TreeNode<T>>): number {
+    if (!node) return -1;
+    const ret = Math.max(
+      this.getNodeHeight(node.left),
+      this.getNodeHeight(node.right)
+    );
+    return ret + 1;
+  }
+}
