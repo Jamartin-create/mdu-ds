@@ -49,5 +49,15 @@ describe("AVLTree Basic Func Test", () => {
     tree.insert(6);
     expect(tree.inOrderTraverse()).toBe("2,3,5,6,9,11");
     expect(tree.isBalance()).true;
+    console.log(tree.toString());
+  });
+  it("Test remove", () => {
+    tree.remove(6);
+    tree.remove(11);
+    tree.remove(9);
+    console.log(tree.toString());
+    expect(tree.isBalance()).true;
+    expect(tree.root?.value).toBe(3);
+    expect(tree.inOrderTraverse()).toBe("2,3,5");
   });
 });
