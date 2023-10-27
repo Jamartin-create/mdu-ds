@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { BinarySearchTree } from "../../structure";
+import { AVLTree, BinarySearchTree } from "../../structure";
 
 describe("BinarySerachTree Basic Func Test", () => {
   const tree = new BinarySearchTree<number>();
@@ -32,5 +32,22 @@ describe("BinarySerachTree Basic Func Test", () => {
     expect(tree.inOrderTraverse()).toBe("5,8,9,12");
     tree.remove(9);
     expect(tree.inOrderTraverse()).toBe("5,8,12");
+  });
+});
+
+describe("AVLTree Basic Func Test", () => {
+  const tree = new AVLTree<number>();
+  it("Test insert", () => {
+    tree.insert(5);
+    tree.insert(3);
+    tree.insert(2);
+    expect(tree.inOrderTraverse()).toBe("2,3,5");
+    tree.insert(9);
+    expect(tree.inOrderTraverse()).toBe("2,3,5,9");
+    tree.insert(11);
+    expect(tree.inOrderTraverse()).toBe("2,3,5,9,11");
+    tree.insert(6);
+    expect(tree.inOrderTraverse()).toBe("2,3,5,6,9,11");
+    expect(tree.isBalance()).true;
   });
 });

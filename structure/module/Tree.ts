@@ -61,7 +61,7 @@ export class BinarySearchTree<T> extends BaseClass {
     return this.removeNode(this.root, value) ? true : false;
   }
 
-  private removeNode(node: Nullable<TreeNode<T>>, value: T) {
+  removeNode(node: Nullable<TreeNode<T>>, value: T) {
     if (!node) return null;
     if (this.compareFn(value, node.value) === COMPARE.LESS_THAN) {
       node.left = this.removeNode(node.left, value);
@@ -169,6 +169,46 @@ export class AVLTree<T> extends BinarySearchTree<T> {
     this.root = this.insertAVLNode(this.root, value);
   }
 
+  // 是否平衡
+  isBalance(): boolean {
+    if (!this.root) return true;
+    return this.checkBalanced(this.root) === BalanceType.BALANCE;
+  }
+
+  // 新实现“删除”核心算法
+  removeNode(node: Nullable<TreeNode<T>>, value: T): Nullable<TreeNode<T>> {
+    super.removeNode(node, value);
+    if (!node) return null;
+    // 判断树的哪一侧不平衡
+    const balanceType = this.checkBalanced(node);
+    // 如果是左侧不平衡
+    if (balanceType === BalanceType.UNBALANCE_LEFT) {
+      // 判断左子树的哪一侧不平衡（从而决定是 LL 还是 LR）
+      const leftBalance = this.checkBalanced(node.left!);
+      if (
+        leftBalance === BalanceType.BALANCE ||
+        leftBalance === BalanceType.SLIGHT_UNBALANCE_LEFT
+      ) {
+        this.rotationLL(node);
+      } else if (leftBalance === BalanceType.SLIGHT_UNBALANCE_RIGHT) {
+        return this.rotationLR(node.left!);
+      }
+    }
+    if (balanceType === BalanceType.UNBALANCE_RIGHT) {
+      // 判断右子树的哪一侧不平衡（同上）
+      const rightBalance = this.checkBalanced(node.right!);
+      if (
+        rightBalance === BalanceType.BALANCE ||
+        rightBalance === BalanceType.SLIGHT_UNBALANCE_RIGHT
+      ) {
+        this.rotationRR(node);
+      } else if (rightBalance === BalanceType.SLIGHT_UNBALANCE_LEFT) {
+        return this.rotationRL(node.right!);
+      }
+    }
+    return node;
+  }
+
   // 新实现“插入”核心算法
   private insertAVLNode(node: Nullable<TreeNode<T>>, value: T): TreeNode<T> {
     if (!node) {
@@ -214,18 +254,18 @@ export class AVLTree<T> extends BinarySearchTree<T> {
 
   // 节点右旋转（针对 LL 情况）
   private rotationLL(node: TreeNode<T>) {
-    const temp = node.right!;
-    node.right = temp.left;
-    temp.left = node;
-    return node;
+    const temp = node.left!; // 这个方法只有在负方法验证了 left 存在后才会调用
+    node.left = temp.right;
+    temp.right = node;
+    return temp;
   }
 
   // 节点左旋转（针对 RR 情况）
   private rotationRR(node: TreeNode<T>) {
-    const temp = node.left!; // 这个方法只有在负方法验证了 left 存在后才会调用
-    node.left = temp.right;
-    temp.right = node;
-    return node;
+    const temp = node.right!;
+    node.right = temp.left;
+    temp.left = node;
+    return temp;
   }
 
   // 检查树是否平衡
@@ -254,5 +294,17 @@ export class AVLTree<T> extends BinarySearchTree<T> {
       this.getNodeHeight(node.right)
     );
     return ret + 1;
+  }
+
+  toString(): string {
+    return this.getNodeString(this.root, "");
+  }
+
+  private getNodeString(node: Nullable<TreeNode<T>>, space: string): string {
+    if (!node) return "";
+    let ret = node.value + "\n";
+    ret += this.getNodeString(node.left, space + " ");
+    ret += this.getNodeString(node.right, space + " ");
+    return space + "->" + ret;
   }
 }
