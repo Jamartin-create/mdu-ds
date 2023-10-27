@@ -92,6 +92,18 @@ export class BinarySearchTree<T> extends BaseClass {
     }
   }
 
+  toString(): string {
+    return this.getNodeString(this.root, "");
+  }
+
+  private getNodeString(node: Nullable<TreeNode<T>>, space: string): string {
+    if (!node) return "";
+    let ret = node.value + "\n";
+    ret += this.getNodeString(node.left, space + " ");
+    ret += this.getNodeString(node.right, space + " ");
+    return space + "->" + ret;
+  }
+
   private searchNode(
     node: Nullable<TreeNode<T>>,
     value: T
@@ -169,6 +181,12 @@ export class AVLTree<T> extends BinarySearchTree<T> {
     this.root = this.insertAVLNode(this.root, value);
   }
 
+  remove(value: T): boolean {
+    const ret = this.removeAVLNode(this.root, value);
+    this.root = ret;
+    return ret ? true : false;
+  }
+
   // 是否平衡
   isBalance(): boolean {
     if (!this.root) return true;
@@ -176,9 +194,9 @@ export class AVLTree<T> extends BinarySearchTree<T> {
   }
 
   // 新实现“删除”核心算法
-  removeNode(node: Nullable<TreeNode<T>>, value: T): Nullable<TreeNode<T>> {
+  removeAVLNode(node: Nullable<TreeNode<T>>, value: T): Nullable<TreeNode<T>> {
     super.removeNode(node, value);
-    if (!node) return null;
+    if (!node) return node;
     // 判断树的哪一侧不平衡
     const balanceType = this.checkBalanced(node);
     // 如果是左侧不平衡
@@ -189,8 +207,9 @@ export class AVLTree<T> extends BinarySearchTree<T> {
         leftBalance === BalanceType.BALANCE ||
         leftBalance === BalanceType.SLIGHT_UNBALANCE_LEFT
       ) {
-        this.rotationLL(node);
-      } else if (leftBalance === BalanceType.SLIGHT_UNBALANCE_RIGHT) {
+        return this.rotationLL(node);
+      }
+      if (leftBalance === BalanceType.SLIGHT_UNBALANCE_RIGHT) {
         return this.rotationLR(node.left!);
       }
     }
@@ -201,8 +220,9 @@ export class AVLTree<T> extends BinarySearchTree<T> {
         rightBalance === BalanceType.BALANCE ||
         rightBalance === BalanceType.SLIGHT_UNBALANCE_RIGHT
       ) {
-        this.rotationRR(node);
-      } else if (rightBalance === BalanceType.SLIGHT_UNBALANCE_LEFT) {
+        return this.rotationRR(node);
+      }
+      if (rightBalance === BalanceType.SLIGHT_UNBALANCE_LEFT) {
         return this.rotationRL(node.right!);
       }
     }
@@ -294,17 +314,5 @@ export class AVLTree<T> extends BinarySearchTree<T> {
       this.getNodeHeight(node.right)
     );
     return ret + 1;
-  }
-
-  toString(): string {
-    return this.getNodeString(this.root, "");
-  }
-
-  private getNodeString(node: Nullable<TreeNode<T>>, space: string): string {
-    if (!node) return "";
-    let ret = node.value + "\n";
-    ret += this.getNodeString(node.left, space + " ");
-    ret += this.getNodeString(node.right, space + " ");
-    return space + "->" + ret;
   }
 }
