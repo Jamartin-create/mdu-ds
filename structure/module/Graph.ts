@@ -12,16 +12,19 @@ const COLOR: Record<string, ColorType> = {
   BLACK: 2,
 };
 
+type ColorMapType<T extends GraphVerType> = Partial<{ [key in T]: number }>;
+
 function initGraphColor<T extends GraphVerType>(
   vertices: T[]
-): Partial<{ [key in T]: number }> {
-  const color: Partial<{ [key in T]: number }> = {};
+): ColorMapType<T> {
+  const color: ColorMapType<T> = {};
   for (let i = 0; i < vertices.length; i++) {
     color[vertices[i]] = COLOR.WHITE;
   }
   return color;
 }
 
+// 广度优先算法
 export function breadthFirstSearch<T extends GraphVerType>(
   graph: Graph<T>,
   startVertex: T,
@@ -29,7 +32,7 @@ export function breadthFirstSearch<T extends GraphVerType>(
 ) {
   const vertices = graph.getVertices();
   const adjList = graph.getAdjList();
-  const color = initGraphColor(vertices);
+  const color = initGraphColor<T>(vertices);
 
   const queue = new Queue<T>();
 
@@ -53,6 +56,41 @@ export function breadthFirstSearch<T extends GraphVerType>(
       callback(u);
     }
   }
+}
+
+// 深度优先算法
+export function depthFirstSearch<T extends GraphVerType>(
+  graph: Graph<T>,
+  callback: (ret: T) => void
+) {
+  const vertices = graph.getVertices();
+  const adjList = graph.getAdjList();
+  const color = initGraphColor<T>(vertices);
+
+  for (let i = 0; i < vertices.length; i++) {
+    if (color[vertices[i]] === COLOR.WHITE) {
+      depthFirstSearchVisit(vertices[i], color, adjList, callback);
+    }
+  }
+}
+
+function depthFirstSearchVisit<T extends GraphVerType>(
+  u: T,
+  color: ColorMapType<T>,
+  adjList: Dictionary<T[]>,
+  callback: (ret: T) => void
+) {
+  color[u] = COLOR.GREY;
+  if (callback) callback(u);
+  const neighbors = adjList.get(u);
+  if (!neighbors) throw new Error("Not complete graph");
+  for (let i = 0; i < neighbors.length; i++) {
+    const w = neighbors[i];
+    if (color[w] === COLOR.WHITE) {
+      depthFirstSearchVisit(w, color, adjList, callback);
+    }
+  }
+  color[u] = COLOR.BLACK;
 }
 
 export class Graph<T extends GraphVerType> extends BaseClass {
