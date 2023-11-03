@@ -24,7 +24,6 @@ export class Queue<T> extends BaseClass {
     const ret = this.items[this.lowestCount];
     delete this.items[this.lowestCount];
     this.lowestCount++;
-    this.count--;
     return ret;
   }
 
@@ -36,12 +35,12 @@ export class Queue<T> extends BaseClass {
 
   // isEmpty：队列是否为空
   isEmpty(): boolean {
-    return this.count === 0;
+    return this.count - this.lowestCount === 0;
   }
 
   // size：队列大小
   size(): number {
-    return this.count;
+    return this.count - this.lowestCount;
   }
 
   // clear：清空队列
@@ -100,10 +99,10 @@ export class Deque<T> extends Queue<T> {
   // removeBack
   removeBack(): T | undefined {
     if (this.isEmpty()) return undefined;
-    const idx = this.lowestCount + --this.count;
-    console.log(idx);
+    const idx = --this.count;
     const ret = this.items[idx];
     delete this.items[idx];
+    console.log(this.items);
     return ret;
   }
 
@@ -115,7 +114,7 @@ export class Deque<T> extends Queue<T> {
   // peekBack
   peekBack(): T | undefined {
     if (this.isEmpty()) return undefined;
-    const idx = this.lowestCount + --this.count;
+    const idx = this.count - 1;
     return this.items[idx];
   }
 }
