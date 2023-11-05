@@ -1,8 +1,11 @@
 import { BaseClass } from "../common/BaseClass";
-import { TreeNode } from "../common/BaseNode";
+import {
+  RBTreeNode,
+  RBTreeNodeColor,
+  TreeNode,
+  Nullable,
+} from "../common/BaseNode";
 import { defaultCompare, COMPARE, CompareFn } from "../utils/compare";
-
-type Nullable<T> = T | null | undefined;
 
 type DFSType = "IN" | "PRE" | "POST";
 
@@ -314,5 +317,156 @@ export class AVLTree<T> extends BinarySearchTree<T> {
       this.getNodeHeight(node.right)
     );
     return ret + 1;
+  }
+}
+
+/**
+ * @description 红黑树特点
+ * 1. 树节点只有红、黑两种颜色
+ * 2. 树的根节点为黑色
+ * 3. 所有叶子节点都为黑色
+ * 4. 如果一个节点是红色，那么他的子节点都是黑的
+ * 5. 不能有两个相邻的红节点（一个红节点不能有红的父节点或子节点）
+ * 6. 从给定的节点到它的后代节点的所有路径包含相同数量的黑色节点
+ */
+export class RBTree<T> extends BinarySearchTree<T> {
+  root: Nullable<RBTreeNode<T>>;
+
+  constructor(compareFn: CompareFn<T> = defaultCompare) {
+    super(compareFn);
+    this.root = null;
+  }
+
+  insert(value: T) {
+    if (this.root == null) {
+      this.root = new RBTreeNode<T>(value);
+      this.root.color = RBTreeNodeColor.BLACK;
+    } else {
+      const newNode = this.insertRBNode(this.root, value);
+      // 验证红黑树结构 @TODO
+      this.fixTreeProperties(newNode);
+    }
+  }
+
+  private insertRBNode(node: RBTreeNode<T>, value: T): RBTreeNode<T> {
+    if (this.compareFn(value, node.value) === COMPARE.LESS_THAN) {
+      if (node.left == null) {
+        node.left = new RBTreeNode<T>(value);
+        node.left.parent = node;
+        return node.left;
+      } else {
+        return this.insertRBNode(node.left, value);
+      }
+    } else if (node.right == null) {
+      node.right = new RBTreeNode<T>(value);
+      node.right.parent = node;
+      return node.right;
+    } else {
+      return this.insertRBNode(node.right, value);
+    }
+  }
+
+  private fixTreeProperties(node: RBTreeNode<T>) {
+    // 节点存在的情况下，如果有以下情况，则需要重新改变树结构：1. 节点的父节点为红色；2. 节点颜色也是红色
+    while (
+      node &&
+      node.parent &&
+      node.parent.isRed() &&
+      node.color != RBTreeNodeColor.BLACK
+    ) {
+      let parent = node.parent;
+      const grandParent = parent.parent;
+      // 情况1：父节点是左侧节点
+      if (grandParent && grandParent.left == parent) {
+        const uncle = grandParent.right; // 爹是左节点，叔叔就是右节点了
+        // 情况1.1：叔也是红色 —— 重新填色即可
+        if (uncle && uncle.isRed()) {
+          grandParent.color = RBTreeNodeColor.RED;
+          parent.color = RBTreeNodeColor.BLACK;
+          uncle.color = RBTreeNodeColor.BLACK;
+        } else {
+          // 情况1.2.1：节点是父节点的右侧节点（树结构右侧偏重：RR 结构，进行 rotationRR 旋转算法）
+          if (node === parent.right) {
+            this.rotationRR(node);
+            // 交换父子关系
+            node = parent;
+            (parent as Nullable<RBTreeNode<T>>) = node.parent;
+          }
+          // 情况1.2.2：节点是父节点的左侧节点 —— 右旋转
+          this.rotationLL(grandParent);
+          parent.color = RBTreeNodeColor.BLACK;
+          grandParent.color = RBTreeNodeColor.RED;
+          node = parent;
+        }
+      } else if (grandParent) {
+        // 情况2：父节点是右侧子节点
+        const uncle = grandParent.left;
+        if (uncle && uncle.isRed()) {
+          // 情况2.1：叔节点还是红色
+          grandParent.color = RBTreeNodeColor.RED;
+          parent.color = RBTreeNodeColor.BLACK;
+          uncle.color = RBTreeNodeColor.BLACK;
+        } else {
+          // 情况2.2.1：节点在父节点的左侧，先进行 rotationLL 算法
+          if (node === parent.left) {
+            this.rotationLL(node);
+            // 交换父子关系（指针）
+            node = parent;
+            (parent as Nullable<RBTreeNode<T>>) = node.parent;
+          }
+          //情况2.2.2：节点在父节点右侧，直接进行 rotationRR 算法(左旋转)
+          this.rotationRR(node);
+          parent.color = RBTreeNodeColor.BLACK;
+          grandParent.color = RBTreeNodeColor.RED;
+          node = parent;
+        }
+      }
+      if (!this.root) return;
+      this.root.color = RBTreeNodeColor.BLACK;
+    }
+  }
+
+  // 节点右旋转（针对 LL 情况）
+  private rotationLL(node: RBTreeNode<T>) {
+    const temp = node.left!; // 这个方法只有在负方法验证了 left 存在后才会调用
+    node.left = temp.right;
+    if (temp.right && temp.right.value) {
+      temp.right.parent = node;
+    }
+    temp.parent = node.parent;
+    if (!node.parent) {
+      this.root = temp;
+    } else {
+      if (node === node.parent.left) {
+        node.parent.left = temp;
+      } else {
+        node.parent.right = temp;
+      }
+    }
+    temp.right = node;
+    node.parent = temp;
+    return temp;
+  }
+
+  // 节点左旋转（针对 RR 情况）
+  private rotationRR(node: RBTreeNode<T>) {
+    const temp = node.right!;
+    node.right = temp.left;
+    if (temp.left && temp.left.value) {
+      temp.left.parent = node;
+    }
+    temp.parent = node.parent;
+    if (!node.parent) {
+      this.root = temp;
+    } else {
+      if (node === node.parent.left) {
+        node.parent.left = temp;
+      } else {
+        node.parent.right = temp;
+      }
+    }
+    temp.left = node;
+    node.parent = temp;
+    return temp;
   }
 }
