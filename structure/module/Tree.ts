@@ -1,4 +1,5 @@
 import { BaseClass } from "../common/BaseClass";
+import chalk from "chalk";
 import {
   RBTreeNode,
   RBTreeNodeColor,
@@ -343,7 +344,7 @@ export class RBTree<T> extends BinarySearchTree<T> {
       this.root.color = RBTreeNodeColor.BLACK;
     } else {
       const newNode = this.insertRBNode(this.root, value);
-      // 验证红黑树结构 @TODO
+      // 验证红黑树结构
       this.fixTreeProperties(newNode);
     }
   }
@@ -367,13 +368,8 @@ export class RBTree<T> extends BinarySearchTree<T> {
   }
 
   private fixTreeProperties(node: RBTreeNode<T>) {
-    // 节点存在的情况下，如果有以下情况，则需要重新改变树结构：1. 节点的父节点为红色；2. 节点颜色也是红色
-    while (
-      node &&
-      node.parent &&
-      node.parent.isRed() &&
-      node.color != RBTreeNodeColor.BLACK
-    ) {
+    // 节点存在的情况下，如果有以下情况，则需要重新改变树结构：节点存在 并且 节点的父节点为红色
+    while (node && node.parent && node.parent.isRed()) {
       let parent = node.parent;
       const grandParent = parent.parent;
       // 情况1：父节点是左侧节点
@@ -468,5 +464,25 @@ export class RBTree<T> extends BinarySearchTree<T> {
     temp.left = node;
     node.parent = temp;
     return temp;
+  }
+
+  toString(): string {
+    return this.getRBTreeNodeString(this.root, "");
+  }
+
+  private getRBTreeNodeString(
+    node: Nullable<RBTreeNode<T>>,
+    space: string
+  ): string {
+    if (!node) return "";
+    let ret = "";
+    if (node.color === RBTreeNodeColor.RED) {
+      ret = chalk.bgRed(node.value) + "\n";
+    } else {
+      ret = chalk.bgGreen(node.value) + "\n";
+    }
+    ret += this.getRBTreeNodeString(node.left, space + "-");
+    ret += this.getRBTreeNodeString(node.right, space + "-");
+    return space + "->" + ret;
   }
 }

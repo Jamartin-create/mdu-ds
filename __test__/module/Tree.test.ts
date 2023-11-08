@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { AVLTree, BinarySearchTree } from "../../structure";
+import { AVLTree, BinarySearchTree, RBTree } from "../../structure";
 
 describe("BinarySerachTree Basic Func Test", () => {
   const tree = new BinarySearchTree<number>();
@@ -49,15 +49,44 @@ describe("AVLTree Basic Func Test", () => {
     tree.insert(6);
     expect(tree.inOrderTraverse()).toBe("2,3,5,6,9,11");
     expect(tree.isBalance()).true;
-    console.log(tree.toString());
+    // console.log(tree.toString());
   });
   it("Test remove", () => {
     tree.remove(6);
     tree.remove(11);
     tree.remove(9);
-    console.log(tree.toString());
+    // console.log(tree.toString());
     expect(tree.isBalance()).true;
     expect(tree.root?.value).toBe(3);
     expect(tree.inOrderTraverse()).toBe("2,3,5");
+  });
+
+  it("TEST", () => {
+    tree.insert(100);
+    tree.insert(80);
+    tree.insert(60);
+    tree.insert(30);
+    tree.insert(20);
+    tree.insert(10);
+    tree.insert(5);
+    console.log(tree.toString());
+  });
+});
+
+describe("RBTree Basic Func Test", () => {
+  const tree = new RBTree<number>();
+  it("Test insert", () => {
+    tree.insert(100);
+    tree.insert(80);
+    tree.insert(60);
+    tree.insert(30);
+    tree.insert(20);
+    tree.insert(10);
+    tree.insert(5);
+    tree.insert(3);
+    tree.insert(1);
+    tree.insert(70);
+    tree.insert(50);
+    console.log(tree.toString());
   });
 });
